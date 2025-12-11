@@ -5,12 +5,7 @@ import '../theme/app_spacing.dart';
 import '../theme/app_typography.dart';
 
 /// Snackbar type for different visual styles
-enum SnackBarType {
-  info,
-  success,
-  warning,
-  error,
-}
+enum SnackBarType { info, success, warning, error }
 
 /// A utility class for showing styled snackbars
 class AppSnackBar {
@@ -155,19 +150,18 @@ class AppSnackBar {
       backgroundColor: colors.background,
       duration: duration,
       behavior: SnackBarBehavior.floating,
-      shape: RoundedRectangleBorder(
-        borderRadius: AppSpacing.borderRadiusSm,
-      ),
+      shape: RoundedRectangleBorder(borderRadius: AppSpacing.borderRadiusSm),
       margin: AppSpacing.paddingMd,
       showCloseIcon: showCloseIcon,
       closeIconColor: colors.foreground,
-      action: actionLabel != null && onAction != null
-          ? SnackBarAction(
-              label: actionLabel,
-              textColor: colors.foreground,
-              onPressed: onAction,
-            )
-          : null,
+      action:
+          actionLabel != null && onAction != null
+              ? SnackBarAction(
+                label: actionLabel,
+                textColor: colors.foreground,
+                onPressed: onAction,
+              )
+              : null,
     );
   }
 
@@ -188,23 +182,23 @@ class AppSnackBar {
 
     return switch (type) {
       SnackBarType.info => (
-          background: isDark ? AppColors.dark.infoBackground : AppColors.info,
-          foreground: isDark ? AppColors.info : AppColors.white,
-        ),
+        background: isDark ? AppColors.dark.infoBackground : AppColors.info,
+        foreground: isDark ? AppColors.info : AppColors.white,
+      ),
       SnackBarType.success => (
-          background:
-              isDark ? AppColors.dark.successBackground : AppColors.success,
-          foreground: isDark ? AppColors.success : AppColors.white,
-        ),
+        background:
+            isDark ? AppColors.dark.successBackground : AppColors.success,
+        foreground: isDark ? AppColors.success : AppColors.white,
+      ),
       SnackBarType.warning => (
-          background:
-              isDark ? AppColors.dark.warningBackground : AppColors.warning,
-          foreground: isDark ? AppColors.warning : AppColors.white,
-        ),
+        background:
+            isDark ? AppColors.dark.warningBackground : AppColors.warning,
+        foreground: isDark ? AppColors.warning : AppColors.white,
+      ),
       SnackBarType.error => (
-          background: isDark ? AppColors.dark.errorBackground : AppColors.error,
-          foreground: isDark ? AppColors.error : AppColors.white,
-        ),
+        background: isDark ? AppColors.dark.errorBackground : AppColors.error,
+        foreground: isDark ? AppColors.error : AppColors.white,
+      ),
     };
   }
 }

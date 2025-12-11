@@ -8,5 +8,20 @@
   "currentValue": "当前值: {value}",
   "errorOccurred": "发生错误",
   "retry": "重试",
-  "loading": "加载中..."
+  "loading": "加载中...",
+  "loginTitle": "欢迎回来",
+  "loginSubtitle": "登录以继续",
+  "email": "邮箱",
+  "emailHint": "请输入邮箱",
+  "emailRequired": "邮箱不能为空",
+  "emailInvalid": "请输入有效的邮箱",
+  "password": "密码",
+  "passwordHint": "请输入密码",
+  "passwordRequired": "密码不能为空",
+  "passwordTooShort": "密码至少需要6个字符",
+  "forgotPassword": "忘记密码？",
+  "login": "登录",
+  "loginSuccess": "登录成功",
+  "noAccount": "还没有账号？",
+  "signUp": "注册"
 }

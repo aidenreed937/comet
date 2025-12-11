@@ -41,10 +41,8 @@ class _ShimmerLoadingState extends State<ShimmerLoading>
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: widget.duration,
-    )..repeat();
+    _controller = AnimationController(vsync: this, duration: widget.duration)
+      ..repeat();
 
     _animation = Tween<double>(begin: -2, end: 2).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeInOutSine),
@@ -65,7 +63,8 @@ class _ShimmerLoadingState extends State<ShimmerLoading>
     final baseColor =
         widget.baseColor ?? (isDark ? AppColors.gray800 : AppColors.gray200);
     final highlightColor =
-        widget.highlightColor ?? (isDark ? AppColors.gray700 : AppColors.gray100);
+        widget.highlightColor ??
+        (isDark ? AppColors.gray700 : AppColors.gray100);
 
     return AnimatedBuilder(
       animation: _animation,
@@ -74,11 +73,7 @@ class _ShimmerLoadingState extends State<ShimmerLoading>
           blendMode: BlendMode.srcATop,
           shaderCallback: (bounds) {
             return LinearGradient(
-              colors: [
-                baseColor,
-                highlightColor,
-                baseColor,
-              ],
+              colors: [baseColor, highlightColor, baseColor],
               stops: const [0.0, 0.5, 1.0],
               transform: _SlidingGradientTransform(
                 slidePercent: _animation.value,
@@ -105,12 +100,7 @@ class _SlidingGradientTransform extends GradientTransform {
 
 /// Predefined shimmer skeleton shapes
 class ShimmerBox extends StatelessWidget {
-  const ShimmerBox({
-    super.key,
-    this.width,
-    this.height,
-    this.borderRadius,
-  });
+  const ShimmerBox({super.key, this.width, this.height, this.borderRadius});
 
   final double? width;
   final double? height;
@@ -134,10 +124,7 @@ class ShimmerBox extends StatelessWidget {
 
 /// Circle shaped shimmer placeholder
 class ShimmerCircle extends StatelessWidget {
-  const ShimmerCircle({
-    required this.size,
-    super.key,
-  });
+  const ShimmerCircle({required this.size, super.key});
 
   final double size;
 
@@ -149,10 +136,7 @@ class ShimmerCircle extends StatelessWidget {
     return Container(
       width: size,
       height: size,
-      decoration: BoxDecoration(
-        color: color,
-        shape: BoxShape.circle,
-      ),
+      decoration: BoxDecoration(color: color, shape: BoxShape.circle),
     );
   }
 }
@@ -231,9 +215,10 @@ class ShimmerCard extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: AppSpacing.borderRadiusMd,
         border: Border.all(
-          color: context.isDarkMode
-              ? AppColors.dark.border
-              : AppColors.light.border,
+          color:
+              context.isDarkMode
+                  ? AppColors.dark.border
+                  : AppColors.light.border,
         ),
       ),
       child: Column(

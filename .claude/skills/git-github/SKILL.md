@@ -90,44 +90,55 @@ Task({
 
 - main 分支只能通过 PR 合并，不允许直接 push
 - 合并前必须：
-  1. ✅ 通过质量检测 (`pnpm quality`)
+  1. ✅ 通过质量检测
   2. ✅ 无冲突（已 rebase 到最新 main）
   3. ✅ PR 审核通过
-- 使用 squash merge 保持提交历史整洁
+- 使用 rebase merge 保持提交历史整洁
 
 ## 分支命名规范
 
-- `main` - 主分支，保持稳定可发布状态
-- `feature/<name>` - 功能分支，如 `feature/user-auth`
-- `fix/<name>` - 修复分支，如 `fix/login-bug`
-- `hotfix/<name>` - 紧急修复分支
+- `main` - 主分支，保持稳定可发布状态，只接受来自 develop 的 PR
+- `develop` - 开发分支，日常开发的集成分支，feature 分支合并到此
+- `feature/<name>` - 功能分支，从 develop 创建，如 `feature/user-auth`
+- `fix/<name>` - 修复分支，从 develop 创建，如 `fix/login-bug`
+- `hotfix/<name>` - 紧急修复分支，从 main 创建，合并到 main 和 develop
 - `refactor/<name>` - 重构分支
 - `docs/<name>` - 文档更新分支
+
+### 分支流向
+
+```
+feature/xxx ─┐
+fix/xxx ─────┼──► develop ──► main (发布)
+refactor/xxx ┘        ▲
+                      │
+hotfix/xxx ───────────┴──► main
+```
 
 ## Feature 分支合并流程
 
 **原则：先 rebase，后 PR，保持线性历史**
 
-### 完整流程
+### 完整流程（Feature → Develop）
 
 ```bash
-# 1. 创建功能分支
-git checkout main
-git pull origin main
+# 1. 从 develop 创建功能分支
+git checkout develop
+git pull origin develop
 git checkout -b feature/your-feature
 
-# 2. 开发过程中定期同步 main
-git fetch origin main
-git rebase origin/main
+# 2. 开发过程中定期同步 develop
+git fetch origin develop
+git rebase origin/develop
 
 # 3. 完成开发后确保代码质量
 flutter analyze
 dart format .
 flutter test
 
-# 4. Rebase 到最新 main
-git fetch origin main
-git rebase origin/main
+# 4. Rebase 到最新 develop
+git fetch origin develop
+git rebase origin/develop
 
 # 5. 解决冲突（如有）
 # 编辑冲突文件后：
@@ -137,8 +148,8 @@ git rebase --continue
 # 6. 强制推送（rebase 后必须 force push）
 git push --force-with-lease origin feature/your-feature
 
-# 7. 创建 PR
-gh pr create --base main --head feature/your-feature \
+# 7. 创建 PR（目标分支：develop）
+gh pr create --base develop --head feature/your-feature \
   --title "feat: 功能描述" \
   --body "$(cat <<'EOF'
 ## Summary
@@ -156,15 +167,56 @@ EOF
 # 8. 合并前检查清单
 # ✅ flutter analyze 通过
 # ✅ flutter test 通过
-# ✅ 已 rebase 到最新 main，无冲突
+# ✅ 已 rebase 到最新 develop，无冲突
 # ✅ PR 已创建并审核通过
 
 # 9. 合并 PR（推荐 squash merge）
 gh pr merge <pr-number> --squash --delete-branch
 
 # 10. 合并后清理
+git checkout develop
+git pull origin develop
+```
+
+### 发布流程（Develop → Main）
+
+当 develop 分支功能稳定，准备发布时：
+
+```bash
+# 1. 确保 develop 最新
+git checkout develop
+git pull origin develop
+
+# 2. 运行完整质量检测
+flutter analyze
+dart format .
+flutter test
+
+# 3. 创建发布 PR
+gh pr create --base main --head develop \
+  --title "release: v1.x.x 版本发布" \
+  --body "$(cat <<'EOF'
+## Summary
+- 功能1
+- 功能2
+- 修复1
+
+## Test plan
+- [ ] 全量测试通过
+- [ ] 构建验证通过
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+EOF
+)"
+
+# 4. 合并到 main（使用 rebase merge 保持历史）
+gh pr merge <pr-number> --rebase
+
+# 5. 打 tag（可选）
 git checkout main
 git pull origin main
+git tag -a v1.x.x -m "Release v1.x.x"
+git push origin v1.x.x
 ```
 
 ## 提交信息规范
@@ -300,13 +352,22 @@ git checkout main
 git pull origin main
 git checkout -b hotfix/critical-bug
 
-# 修复后直接推送并创建 PR
+# 修复后推送并创建 PR 到 main
 git push -u origin hotfix/critical-bug
 gh pr create --base main --title "hotfix: 紧急修复描述"
 
-# 合并后同步到其他开发分支
+# 合并到 main
+gh pr merge <pr-number> --rebase --delete-branch
+
+# 同步 hotfix 到 develop（重要！）
+git checkout develop
+git pull origin develop
+git merge main
+git push origin develop
+
+# 如果有正在进行的 feature 分支，需要 rebase
 git checkout feature/xxx
-git rebase main
+git rebase develop
 ```
 
 ## 常用命令速查

@@ -55,14 +55,15 @@ class ConfirmDialog extends StatelessWidget {
     return showDialog<bool>(
       context: context,
       barrierDismissible: barrierDismissible,
-      builder: (context) => ConfirmDialog(
-        title: title,
-        content: content,
-        contentWidget: contentWidget,
-        cancelText: cancelText,
-        confirmText: confirmText,
-        isDestructive: isDestructive,
-      ),
+      builder:
+          (context) => ConfirmDialog(
+            title: title,
+            content: content,
+            contentWidget: contentWidget,
+            cancelText: cancelText,
+            confirmText: confirmText,
+            isDestructive: isDestructive,
+          ),
     );
   }
 
@@ -71,14 +72,9 @@ class ConfirmDialog extends StatelessWidget {
     final theme = Theme.of(context);
 
     return AlertDialog(
-      title: Text(
-        title,
-        style: AppTypography.titleLarge,
-      ),
+      title: Text(title, style: AppTypography.titleLarge),
       content: _buildContent(theme),
-      shape: RoundedRectangleBorder(
-        borderRadius: AppSpacing.borderRadiusMd,
-      ),
+      shape: RoundedRectangleBorder(borderRadius: AppSpacing.borderRadiusMd),
       actionsPadding: const EdgeInsets.fromLTRB(
         AppSpacing.lg,
         0,
@@ -104,12 +100,13 @@ class ConfirmDialog extends StatelessWidget {
               Navigator.of(context).pop(true);
             }
           },
-          style: isDestructive
-              ? FilledButton.styleFrom(
-                  backgroundColor: theme.colorScheme.error,
-                  foregroundColor: theme.colorScheme.onError,
-                )
-              : null,
+          style:
+              isDestructive
+                  ? FilledButton.styleFrom(
+                    backgroundColor: theme.colorScheme.error,
+                    foregroundColor: theme.colorScheme.onError,
+                  )
+                  : null,
           child: Text(confirmText),
         ),
       ],
@@ -137,7 +134,8 @@ class ConfirmDialogHelper {
   static Future<bool?> delete(
     BuildContext context, {
     String title = 'Delete Item',
-    String content = 'Are you sure you want to delete this item? This action cannot be undone.',
+    String content =
+        'Are you sure you want to delete this item? This action cannot be undone.',
     String cancelText = 'Cancel',
     String confirmText = 'Delete',
   }) {
@@ -172,7 +170,8 @@ class ConfirmDialogHelper {
   static Future<bool?> discardChanges(
     BuildContext context, {
     String title = 'Discard Changes',
-    String content = 'You have unsaved changes. Are you sure you want to discard them?',
+    String content =
+        'You have unsaved changes. Are you sure you want to discard them?',
     String cancelText = 'Keep Editing',
     String confirmText = 'Discard',
   }) {

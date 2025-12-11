@@ -22,9 +22,7 @@ void main() {
 
   ProviderContainer createContainer() {
     return ProviderContainer(
-      overrides: [
-        keyValueStorageProvider.overrideWithValue(mockStorage),
-      ],
+      overrides: [keyValueStorageProvider.overrideWithValue(mockStorage)],
     );
   }
 
@@ -40,8 +38,9 @@ void main() {
 
     test('setThemeMode updates state and persists', () async {
       when(() => mockStorage.getString(any())).thenAnswer((_) async => null);
-      when(() => mockStorage.setString(any(), any()))
-          .thenAnswer((_) async => true);
+      when(
+        () => mockStorage.setString(any(), any()),
+      ).thenAnswer((_) async => true);
 
       container = createContainer();
       final notifier = container.read(themeModeProvider.notifier);
@@ -54,8 +53,9 @@ void main() {
 
     test('toggleThemeMode cycles through modes', () async {
       when(() => mockStorage.getString(any())).thenAnswer((_) async => null);
-      when(() => mockStorage.setString(any(), any()))
-          .thenAnswer((_) async => true);
+      when(
+        () => mockStorage.setString(any(), any()),
+      ).thenAnswer((_) async => true);
 
       container = createContainer();
       final notifier = container.read(themeModeProvider.notifier);
@@ -75,8 +75,9 @@ void main() {
 
     test('setLightMode sets theme to light', () async {
       when(() => mockStorage.getString(any())).thenAnswer((_) async => null);
-      when(() => mockStorage.setString(any(), any()))
-          .thenAnswer((_) async => true);
+      when(
+        () => mockStorage.setString(any(), any()),
+      ).thenAnswer((_) async => true);
 
       container = createContainer();
       final notifier = container.read(themeModeProvider.notifier);
@@ -89,8 +90,9 @@ void main() {
 
     test('setDarkMode sets theme to dark', () async {
       when(() => mockStorage.getString(any())).thenAnswer((_) async => null);
-      when(() => mockStorage.setString(any(), any()))
-          .thenAnswer((_) async => true);
+      when(
+        () => mockStorage.setString(any(), any()),
+      ).thenAnswer((_) async => true);
 
       container = createContainer();
       final notifier = container.read(themeModeProvider.notifier);
@@ -103,8 +105,9 @@ void main() {
 
     test('setSystemMode sets theme to system', () async {
       when(() => mockStorage.getString(any())).thenAnswer((_) async => null);
-      when(() => mockStorage.setString(any(), any()))
-          .thenAnswer((_) async => true);
+      when(
+        () => mockStorage.setString(any(), any()),
+      ).thenAnswer((_) async => true);
 
       container = createContainer();
       final notifier = container.read(themeModeProvider.notifier);
@@ -122,8 +125,9 @@ void main() {
     group('helper getters', () {
       test('isDarkMode returns correct value', () async {
         when(() => mockStorage.getString(any())).thenAnswer((_) async => null);
-        when(() => mockStorage.setString(any(), any()))
-            .thenAnswer((_) async => true);
+        when(
+          () => mockStorage.setString(any(), any()),
+        ).thenAnswer((_) async => true);
 
         container = createContainer();
         final notifier = container.read(themeModeProvider.notifier);
@@ -136,8 +140,9 @@ void main() {
 
       test('isLightMode returns correct value', () async {
         when(() => mockStorage.getString(any())).thenAnswer((_) async => null);
-        when(() => mockStorage.setString(any(), any()))
-            .thenAnswer((_) async => true);
+        when(
+          () => mockStorage.setString(any(), any()),
+        ).thenAnswer((_) async => true);
 
         container = createContainer();
         final notifier = container.read(themeModeProvider.notifier);

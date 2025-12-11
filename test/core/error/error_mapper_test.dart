@@ -105,10 +105,7 @@ void main() {
         final exception = DioException(
           type: DioExceptionType.badResponse,
           requestOptions: RequestOptions(),
-          response: Response(
-            statusCode: 400,
-            requestOptions: RequestOptions(),
-          ),
+          response: Response(statusCode: 400, requestOptions: RequestOptions()),
         );
         final failure = ErrorMapper.mapException(exception);
 
@@ -120,10 +117,7 @@ void main() {
         final exception = DioException(
           type: DioExceptionType.badResponse,
           requestOptions: RequestOptions(),
-          response: Response(
-            statusCode: 401,
-            requestOptions: RequestOptions(),
-          ),
+          response: Response(statusCode: 401, requestOptions: RequestOptions()),
         );
         final failure = ErrorMapper.mapException(exception);
 
@@ -134,10 +128,7 @@ void main() {
         final exception = DioException(
           type: DioExceptionType.badResponse,
           requestOptions: RequestOptions(),
-          response: Response(
-            statusCode: 403,
-            requestOptions: RequestOptions(),
-          ),
+          response: Response(statusCode: 403, requestOptions: RequestOptions()),
         );
         final failure = ErrorMapper.mapException(exception);
 
@@ -148,10 +139,7 @@ void main() {
         final exception = DioException(
           type: DioExceptionType.badResponse,
           requestOptions: RequestOptions(),
-          response: Response(
-            statusCode: 404,
-            requestOptions: RequestOptions(),
-          ),
+          response: Response(statusCode: 404, requestOptions: RequestOptions()),
         );
         final failure = ErrorMapper.mapException(exception);
 
@@ -162,10 +150,7 @@ void main() {
         final exception = DioException(
           type: DioExceptionType.badResponse,
           requestOptions: RequestOptions(),
-          response: Response(
-            statusCode: 500,
-            requestOptions: RequestOptions(),
-          ),
+          response: Response(statusCode: 500, requestOptions: RequestOptions()),
         );
         final failure = ErrorMapper.mapException(exception);
 
@@ -177,10 +162,7 @@ void main() {
         final exception = DioException(
           type: DioExceptionType.badResponse,
           requestOptions: RequestOptions(),
-          response: Response(
-            statusCode: 502,
-            requestOptions: RequestOptions(),
-          ),
+          response: Response(statusCode: 502, requestOptions: RequestOptions()),
         );
         final failure = ErrorMapper.mapException(exception);
 
@@ -192,10 +174,7 @@ void main() {
         final exception = DioException(
           type: DioExceptionType.badResponse,
           requestOptions: RequestOptions(),
-          response: Response(
-            statusCode: 503,
-            requestOptions: RequestOptions(),
-          ),
+          response: Response(statusCode: 503, requestOptions: RequestOptions()),
         );
         final failure = ErrorMapper.mapException(exception);
 
@@ -207,10 +186,7 @@ void main() {
         final exception = DioException(
           type: DioExceptionType.badResponse,
           requestOptions: RequestOptions(),
-          response: Response(
-            statusCode: 418,
-            requestOptions: RequestOptions(),
-          ),
+          response: Response(statusCode: 418, requestOptions: RequestOptions()),
         );
         final failure = ErrorMapper.mapException(exception);
 
