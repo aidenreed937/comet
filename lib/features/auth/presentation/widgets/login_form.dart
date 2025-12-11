@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/l10n/l10n.dart';
-import '../../../../core/theme/theme.dart';
 import '../providers/auth_providers.dart';
 import '../providers/login_state.dart';
 
@@ -71,7 +70,7 @@ class _LoginFormState extends ConsumerState<LoginForm> {
               return null;
             },
           ),
-          SizedBox(height: AppSpacing.md),
+          const SizedBox(height: 16),
 
           // Password field
           TextFormField(
@@ -107,7 +106,7 @@ class _LoginFormState extends ConsumerState<LoginForm> {
               return null;
             },
           ),
-          SizedBox(height: AppSpacing.sm),
+          const SizedBox(height: 8),
 
           // Forgot password
           Align(
@@ -117,12 +116,12 @@ class _LoginFormState extends ConsumerState<LoginForm> {
                   isLoading
                       ? null
                       : () {
-                        // TODO: Navigate to forgot password
+                        // TODO(auth): Navigate to forgot password
                       },
               child: Text(l10n.forgotPassword),
             ),
           ),
-          SizedBox(height: AppSpacing.md),
+          const SizedBox(height: 16),
 
           // Login button
           FilledButton(
@@ -136,7 +135,7 @@ class _LoginFormState extends ConsumerState<LoginForm> {
                     )
                     : Text(l10n.login),
           ),
-          SizedBox(height: AppSpacing.md),
+          const SizedBox(height: 16),
 
           // Sign up link
           Row(
@@ -148,7 +147,7 @@ class _LoginFormState extends ConsumerState<LoginForm> {
                     isLoading
                         ? null
                         : () {
-                          // TODO: Navigate to sign up
+                          // TODO(auth): Navigate to sign up
                         },
                 child: Text(l10n.signUp),
               ),

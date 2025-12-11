@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/l10n/l10n.dart';
-import '../../../../core/theme/theme.dart';
 import '../../../../core/widgets/widgets.dart';
 import '../providers/auth_providers.dart';
 import '../providers/login_state.dart';
@@ -19,7 +18,7 @@ class LoginPage extends ConsumerWidget {
     ref.listen<LoginState>(loginProvider, (previous, next) {
       if (next is LoginSuccess) {
         AppSnackBar.success(context, message: l10n.loginSuccess);
-        // Navigate to home
+        // TODO(auth): Navigate to home
       } else if (next is LoginFailure) {
         AppSnackBar.error(context, message: next.message);
       }
@@ -29,24 +28,24 @@ class LoginPage extends ConsumerWidget {
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            padding: EdgeInsets.all(AppSpacing.lg),
+            padding: const EdgeInsets.all(32),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 // Logo or App Name
-                Icon(
+                const Icon(
                   Icons.lock_outline,
                   size: 80,
-                  color: theme.colorScheme.primary,
+                  color: Color(0xFF6750A4),
                 ),
-                SizedBox(height: AppSpacing.xl),
+                const SizedBox(height: 40),
                 Text(
                   l10n.loginTitle,
                   style: theme.textTheme.displaySmall,
                   textAlign: TextAlign.center,
                 ),
-                SizedBox(height: AppSpacing.sm),
+                const SizedBox(height: 8),
                 Text(
                   l10n.loginSubtitle,
                   style: theme.textTheme.bodyLarge?.copyWith(
@@ -54,7 +53,7 @@ class LoginPage extends ConsumerWidget {
                   ),
                   textAlign: TextAlign.center,
                 ),
-                SizedBox(height: AppSpacing.xxl),
+                const SizedBox(height: 48),
                 const LoginForm(),
               ],
             ),

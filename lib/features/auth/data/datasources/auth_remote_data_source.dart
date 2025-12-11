@@ -10,9 +10,9 @@ abstract class AuthRemoteDataSource {
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
-  final Dio _dio;
-
   AuthRemoteDataSourceImpl(this._dio);
+
+  final Dio _dio;
 
   @override
   Future<LoginResponseDto> login(LoginRequestDto request) async {

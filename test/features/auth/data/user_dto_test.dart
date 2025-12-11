@@ -22,7 +22,7 @@ void main() {
     });
 
     test('should convert to JSON', () {
-      final dto = UserDto(
+      const dto = UserDto(
         id: '123',
         email: 'test@example.com',
         name: 'Test User',

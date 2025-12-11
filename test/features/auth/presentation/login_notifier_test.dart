@@ -62,7 +62,7 @@ void main() {
       const failure = Failure(message: 'Invalid credentials');
       when(
         () => mockRepository.login(any()),
-      ).thenAnswer((_) async => Err(failure));
+      ).thenAnswer((_) async => const Err(failure));
 
       await container
           .read(loginProvider.notifier)

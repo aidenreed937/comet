@@ -1,9 +1,9 @@
 /// Login credentials for authentication
 class LoginCredentials {
+  const LoginCredentials({required this.email, required this.password});
+
   final String email;
   final String password;
-
-  const LoginCredentials({required this.email, required this.password});
 
   @override
   bool operator ==(Object other) =>
