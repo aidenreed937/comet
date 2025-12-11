@@ -1,0 +1,12 @@
+{
+  "@@locale": "zh",
+  "appTitle": "Comet",
+  "counterTitle": "计数器",
+  "increment": "增加",
+  "decrement": "减少",
+  "reset": "重置",
+  "currentValue": "当前值: {value}",
+  "errorOccurred": "发生错误",
+  "retry": "重试",
+  "loading": "加载中..."
+}
