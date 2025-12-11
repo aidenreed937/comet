@@ -11,6 +11,9 @@ class DioClient {
 
   final Dio _dio;
 
+  /// Expose Dio instance for direct use
+  Dio get dio => _dio;
+
   static Dio _createDio() {
     final dio = Dio(
       BaseOptions(

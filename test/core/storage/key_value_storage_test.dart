@@ -36,8 +36,9 @@ void main() {
 
     group('setString', () {
       test('stores value and returns true on success', () async {
-        when(() => mockPrefs.setString('test_key', 'test_value'))
-            .thenAnswer((_) async => true);
+        when(
+          () => mockPrefs.setString('test_key', 'test_value'),
+        ).thenAnswer((_) async => true);
 
         final result = await storage.setString('test_key', 'test_value');
 
@@ -66,8 +67,9 @@ void main() {
 
     group('setInt', () {
       test('stores value and returns true on success', () async {
-        when(() => mockPrefs.setInt('test_key', 42))
-            .thenAnswer((_) async => true);
+        when(
+          () => mockPrefs.setInt('test_key', 42),
+        ).thenAnswer((_) async => true);
 
         final result = await storage.setInt('test_key', 42);
 
@@ -87,8 +89,9 @@ void main() {
 
     group('setDouble', () {
       test('stores value and returns true on success', () async {
-        when(() => mockPrefs.setDouble('test_key', 3.14))
-            .thenAnswer((_) async => true);
+        when(
+          () => mockPrefs.setDouble('test_key', 3.14),
+        ).thenAnswer((_) async => true);
 
         final result = await storage.setDouble('test_key', 3.14);
 
@@ -108,8 +111,9 @@ void main() {
 
     group('setBool', () {
       test('stores value and returns true on success', () async {
-        when(() => mockPrefs.setBool('test_key', true))
-            .thenAnswer((_) async => true);
+        when(
+          () => mockPrefs.setBool('test_key', true),
+        ).thenAnswer((_) async => true);
 
         final result = await storage.setBool('test_key', value: true);
 
@@ -119,8 +123,9 @@ void main() {
 
     group('getStringList', () {
       test('returns value when key exists', () async {
-        when(() => mockPrefs.getStringList('test_key'))
-            .thenReturn(['a', 'b', 'c']);
+        when(
+          () => mockPrefs.getStringList('test_key'),
+        ).thenReturn(['a', 'b', 'c']);
 
         final result = await storage.getStringList('test_key');
 
@@ -130,8 +135,9 @@ void main() {
 
     group('setStringList', () {
       test('stores value and returns true on success', () async {
-        when(() => mockPrefs.setStringList('test_key', ['a', 'b']))
-            .thenAnswer((_) async => true);
+        when(
+          () => mockPrefs.setStringList('test_key', ['a', 'b']),
+        ).thenAnswer((_) async => true);
 
         final result = await storage.setStringList('test_key', ['a', 'b']);
 

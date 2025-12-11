@@ -10,7 +10,11 @@ class AuthInterceptor extends QueuedInterceptor {
     this.tokenManager,
     this.onTokenRefresh,
     this.onAuthFailure,
-    this.excludedPaths = const ['/auth/login', '/auth/register', '/auth/refresh'],
+    this.excludedPaths = const [
+      '/auth/login',
+      '/auth/register',
+      '/auth/refresh',
+    ],
   });
 
   /// Token manager for accessing and updating tokens
@@ -58,7 +62,10 @@ class AuthInterceptor extends QueuedInterceptor {
   }
 
   @override
-  Future<void> onError(DioException err, ErrorInterceptorHandler handler) async {
+  Future<void> onError(
+    DioException err,
+    ErrorInterceptorHandler handler,
+  ) async {
     // Skip if no token manager configured
     if (tokenManager == null) {
       return handler.next(err);
@@ -136,11 +143,13 @@ class AuthInterceptor extends QueuedInterceptor {
   ) async {
     options.headers['Authorization'] = 'Bearer $token';
 
-    final dio = Dio(BaseOptions(
-      baseUrl: options.baseUrl,
-      connectTimeout: options.connectTimeout,
-      receiveTimeout: options.receiveTimeout,
-    ));
+    final dio = Dio(
+      BaseOptions(
+        baseUrl: options.baseUrl,
+        connectTimeout: options.connectTimeout,
+        receiveTimeout: options.receiveTimeout,
+      ),
+    );
 
     return dio.fetch(options);
   }

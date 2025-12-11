@@ -107,7 +107,8 @@ class CacheInterceptor extends Interceptor {
     }
 
     // Check if response should be cached
-    final shouldCache = cacheOptions.shouldCache?.call(response.statusCode ?? 0) ??
+    final shouldCache =
+        cacheOptions.shouldCache?.call(response.statusCode ?? 0) ??
         (response.statusCode != null &&
             response.statusCode! >= 200 &&
             response.statusCode! < 300);
@@ -144,7 +145,9 @@ class CacheInterceptor extends Interceptor {
 
       final cachedEntry = await cacheManager.get(cacheKey);
       if (cachedEntry != null) {
-        return handler.resolve(_createResponse(err.requestOptions, cachedEntry));
+        return handler.resolve(
+          _createResponse(err.requestOptions, cachedEntry),
+        );
       }
     }
 
@@ -177,7 +180,7 @@ class CacheInterceptor extends Interceptor {
       headers: Headers.fromMap({
         'x-cache': ['HIT'],
         'x-cache-age': [
-          DateTime.now().difference(entry.createdAt).inSeconds.toString()
+          DateTime.now().difference(entry.createdAt).inSeconds.toString(),
         ],
       }),
     );
@@ -190,15 +193,17 @@ class CacheInterceptor extends Interceptor {
     CacheOptions cacheOptions,
   ) async {
     try {
-      final dio = Dio(BaseOptions(
-        baseUrl: options.baseUrl,
-        connectTimeout: options.connectTimeout,
-        receiveTimeout: options.receiveTimeout,
-      ));
+      final dio = Dio(
+        BaseOptions(
+          baseUrl: options.baseUrl,
+          connectTimeout: options.connectTimeout,
+          receiveTimeout: options.receiveTimeout,
+        ),
+      );
 
-      final response = await dio.fetch<dynamic>(options.copyWith(
-        extra: {...options.extra, cacheOptionsKey: null},
-      ));
+      final response = await dio.fetch<dynamic>(
+        options.copyWith(extra: {...options.extra, cacheOptionsKey: null}),
+      );
 
       if (response.statusCode != null &&
           response.statusCode! >= 200 &&

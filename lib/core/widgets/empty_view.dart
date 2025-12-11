@@ -106,9 +106,7 @@ class EmptyView extends StatelessWidget {
 
     return Text(
       subtitle!,
-      style: AppTypography.bodyMedium.copyWith(
-        color: textColor,
-      ),
+      style: AppTypography.bodyMedium.copyWith(color: textColor),
       textAlign: TextAlign.center,
     );
   }
@@ -116,10 +114,7 @@ class EmptyView extends StatelessWidget {
   Widget _buildAction() {
     if (action != null) return action!;
 
-    return FilledButton(
-      onPressed: onAction,
-      child: Text(actionText!),
-    );
+    return FilledButton(onPressed: onAction, child: Text(actionText!));
   }
 }
 

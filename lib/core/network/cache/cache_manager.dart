@@ -7,9 +7,7 @@ import 'cache_strategy.dart';
 
 /// Manager for caching network responses
 class CacheManager {
-  CacheManager({
-    this.boxName = 'network_cache',
-  });
+  CacheManager({this.boxName = 'network_cache'});
 
   /// Name of the Hive box for caching
   final String boxName;
