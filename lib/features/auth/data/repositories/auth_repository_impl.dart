@@ -12,12 +12,6 @@ import '../datasources/auth_remote_data_source.dart';
 import '../models/login_request_dto.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
-  final AuthRemoteDataSource _remoteDataSource;
-  final KeyValueStorage _storage;
-  final AuthTokenManager _tokenManager;
-
-  static const _userKey = 'auth_user';
-
   AuthRepositoryImpl({
     required AuthRemoteDataSource remoteDataSource,
     required KeyValueStorage storage,
@@ -25,6 +19,12 @@ class AuthRepositoryImpl implements AuthRepository {
   }) : _remoteDataSource = remoteDataSource,
        _storage = storage,
        _tokenManager = tokenManager;
+
+  final AuthRemoteDataSource _remoteDataSource;
+  final KeyValueStorage _storage;
+  final AuthTokenManager _tokenManager;
+
+  static const _userKey = 'auth_user';
 
   @override
   Future<Result<User>> login(LoginCredentials credentials) async {

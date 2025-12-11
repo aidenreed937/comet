@@ -2,10 +2,6 @@ import 'user_dto.dart';
 
 /// DTO for login API response
 class LoginResponseDto {
-  final UserDto user;
-  final String accessToken;
-  final String refreshToken;
-
   const LoginResponseDto({
     required this.user,
     required this.accessToken,
@@ -19,6 +15,10 @@ class LoginResponseDto {
       refreshToken: json['refresh_token'] as String,
     );
   }
+
+  final UserDto user;
+  final String accessToken;
+  final String refreshToken;
 
   Map<String, dynamic> toJson() {
     return {

@@ -1,18 +1,18 @@
 /// User entity representing authenticated user data
 class User {
+  const User({
+    required this.id,
+    required this.email,
+    required this.createdAt,
+    this.name,
+    this.avatar,
+  });
+
   final String id;
   final String email;
   final String? name;
   final String? avatar;
   final DateTime createdAt;
-
-  const User({
-    required this.id,
-    required this.email,
-    this.name,
-    this.avatar,
-    required this.createdAt,
-  });
 
   @override
   bool operator ==(Object other) =>

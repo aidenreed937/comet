@@ -14,13 +14,13 @@ class LoginLoading extends LoginState {
 }
 
 class LoginSuccess extends LoginState {
-  final User user;
-
   const LoginSuccess(this.user);
+
+  final User user;
 }
 
 class LoginFailure extends LoginState {
-  final String message;
-
   const LoginFailure(this.message);
+
+  final String message;
 }

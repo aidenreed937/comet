@@ -2,18 +2,12 @@ import '../../domain/entities/user.dart';
 
 /// DTO for User API response
 class UserDto {
-  final String id;
-  final String email;
-  final String? name;
-  final String? avatar;
-  final String createdAt;
-
   const UserDto({
     required this.id,
     required this.email,
+    required this.createdAt,
     this.name,
     this.avatar,
-    required this.createdAt,
   });
 
   factory UserDto.fromJson(Map<String, dynamic> json) {
@@ -25,6 +19,12 @@ class UserDto {
       createdAt: json['created_at'] as String,
     );
   }
+
+  final String id;
+  final String email;
+  final String? name;
+  final String? avatar;
+  final String createdAt;
 
   Map<String, dynamic> toJson() {
     return {
