@@ -1,0 +1,44 @@
+{
+  "@@locale": "en",
+  "appTitle": "Comet",
+  "@appTitle": {
+    "description": "The title of the application"
+  },
+  "counterTitle": "Counter",
+  "@counterTitle": {
+    "description": "The title of the counter page"
+  },
+  "increment": "Increment",
+  "@increment": {
+    "description": "Button text for increment action"
+  },
+  "decrement": "Decrement",
+  "@decrement": {
+    "description": "Button text for decrement action"
+  },
+  "reset": "Reset",
+  "@reset": {
+    "description": "Button text for reset action"
+  },
+  "currentValue": "Current value: {value}",
+  "@currentValue": {
+    "description": "Display current counter value",
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
+  "errorOccurred": "An error occurred",
+  "@errorOccurred": {
+    "description": "Generic error message"
+  },
+  "retry": "Retry",
+  "@retry": {
+    "description": "Button text for retry action"
+  },
+  "loading": "Loading...",
+  "@loading": {
+    "description": "Loading indicator text"
+  }
+}

@@ -1,0 +1,29 @@
+name: comet
+org: com.example
+
+state_management: riverpod
+router: go_router
+
+envs:
+  - name: development
+    flavor: dev
+    dart_define:
+      APP_ENV: development
+  - name: staging
+    flavor: stg
+    dart_define:
+      APP_ENV: staging
+  - name: production
+    flavor: prod
+    dart_define:
+      APP_ENV: production
+
+dependencies:
+  core:
+    flutter_riverpod: ^3.0.3
+    go_router: ^17.0.1
+    dio: ^5.9.0
+    shared_preferences: ^2.5.4
+    flutter_secure_storage: ^10.0.0
+    hive: ^2.2.3
+    hive_flutter: ^1.1.0
