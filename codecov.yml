@@ -1,0 +1,13 @@
+coverage:
+  status:
+    project:
+      default:
+        target: auto
+    patch:
+      default:
+        target: auto
+
+ignore:
+  - "**/*.g.dart"
+  - "**/*.freezed.dart"
+  - "lib/core/l10n/generated/**"
