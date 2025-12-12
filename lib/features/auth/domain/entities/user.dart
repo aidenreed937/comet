@@ -14,6 +14,22 @@ class User {
   final String? avatar;
   final DateTime createdAt;
 
+  User copyWith({
+    String? id,
+    String? email,
+    String? name,
+    String? avatar,
+    DateTime? createdAt,
+  }) {
+    return User(
+      id: id ?? this.id,
+      email: email ?? this.email,
+      name: name ?? this.name,
+      avatar: avatar ?? this.avatar,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||

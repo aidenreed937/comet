@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/l10n/l10n.dart';
+import '../../../../core/theme/app_spacing.dart';
 import '../providers/counter_provider.dart';
 
 class CounterView extends ConsumerWidget {
@@ -19,7 +20,7 @@ class CounterView extends ConsumerWidget {
           l10n.currentValue(counter.value),
           style: Theme.of(context).textTheme.headlineMedium,
         ),
-        const SizedBox(height: 32),
+        const SizedBox(height: AppSpacing.xl),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -31,7 +32,7 @@ class CounterView extends ConsumerWidget {
               tooltip: l10n.decrement,
               child: const Icon(Icons.remove),
             ),
-            const SizedBox(width: 16),
+            const SizedBox(width: AppSpacing.md),
             FloatingActionButton(
               heroTag: 'increment',
               onPressed: () {
@@ -42,7 +43,7 @@ class CounterView extends ConsumerWidget {
             ),
           ],
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: AppSpacing.md),
         TextButton.icon(
           onPressed: () {
             ref.read(counterControllerProvider.notifier).reset();

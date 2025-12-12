@@ -14,6 +14,14 @@ flutter run -t lib/main_development.dart --dart-define=APP_ENV=development
 flutter run -t lib/main_staging.dart --dart-define=APP_ENV=staging
 flutter run -t lib/main_production.dart --dart-define=APP_ENV=production
 
+# Flutter run interactive commands (press keys when app is running)
+r                 # Hot reload. 🔥🔥🔥
+R                 # Hot restart.
+h                 # List all available interactive commands.
+d                 # Detach (terminate "flutter run" but leave application running).
+c                 # Clear the screen
+q                 # Quit (terminate the application on the device).
+
 # Run tests
 flutter test                                    # All tests
 flutter test test/features/counter/             # Feature-specific tests
