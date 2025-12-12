@@ -1,38 +1,12 @@
-请使用 Skill tool 触发 flutter-mcp-guide skill。
+---
+description: Flutter MCP 工具使用指南，启动应用、调试、热重载
+---
 
-这个 skill 提供 Flutter MCP 工具的使用指南和最佳实践，包括：
+使用 flutter-mcp-guide skill 获取 MCP 工具指南。
 
-## 核心功能
-- 🚀 启动和运行 Flutter 应用的标准流程
-- 🔍 检查和调试应用状态
-- 🔧 修复错误的标准流程
-- 📸 使用截图快速验证 UI
-- ⚡ 热重载和热重启的选择策略
-- 🧪 使用 integration_test 进行集成测试
+**触发**: `Skill tool → flutter-mcp-guide`
 
-## 关键最佳实践
-- ✅ 始终使用 `get_widget_tree(summaryOnly: true)` 避免大响应
-- ✅ 限制日志行数 `maxLines: 50`
-- ✅ 优先使用截图验证 UI
-- ✅ 使用 integration_test 替代已弃用的 flutter_driver
-- ❌ 避免 `summaryOnly: false`（会产生 10万+ tokens）
-- ❌ 避免 `maxLines: -1`（可能产生巨大响应）
-
-## 标准工作流
-
-### 启动应用
-```
-list_devices → launch_app → connect_dart_tooling_daemon
-```
-
-### 验证状态
-```
-get_runtime_errors → get_widget_tree(summaryOnly: true) → 截图
-```
-
-### 修复错误
-```
-分析代码 → 修改 → hot_reload/hot_restart → 验证
-```
-
-触发这个 skill 将提供详细的指导和示例。
+**核心原则**:
+- `get_widget_tree(summaryOnly: true)` - 避免 100k+ tokens
+- `get_app_logs(maxLines: 50)` - 限制日志
+- 截图优先验证 UI
