@@ -50,9 +50,7 @@ Future<void> bootstrap({required String environment}) async {
 
       runApp(
         ProviderScope(
-          overrides: [
-            keyValueStorageProvider.overrideWithValue(storage),
-          ],
+          overrides: [keyValueStorageProvider.overrideWithValue(storage)],
           child: const App(),
         ),
       );

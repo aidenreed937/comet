@@ -23,10 +23,6 @@ class LoginPage extends ConsumerWidget {
       }
     });
 
-    return const Scaffold(
-      body: SafeArea(
-        child: LoginView(),
-      ),
-    );
+    return const Scaffold(body: SafeArea(child: LoginView()));
   }
 }

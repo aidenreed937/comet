@@ -16,8 +16,9 @@ void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   group('Login Flow Integration Tests', () {
-    testWidgets('should display login page on app start',
-        (WidgetTester tester) async {
+    testWidgets('should display login page on app start', (
+      WidgetTester tester,
+    ) async {
       // Start the app
       await bootstrap(environment: 'development');
       await tester.pumpAndSettle();
@@ -29,8 +30,9 @@ void main() {
       expect(find.text('登录'), findsOneWidget);
     });
 
-    testWidgets('should show validation errors for empty fields',
-        (WidgetTester tester) async {
+    testWidgets('should show validation errors for empty fields', (
+      WidgetTester tester,
+    ) async {
       // Start the app
       await bootstrap(environment: 'development');
       await tester.pumpAndSettle();
@@ -45,8 +47,9 @@ void main() {
       expect(find.text('请输入密码'), findsOneWidget);
     });
 
-    testWidgets('should show validation error for invalid email',
-        (WidgetTester tester) async {
+    testWidgets('should show validation error for invalid email', (
+      WidgetTester tester,
+    ) async {
       // Start the app
       await bootstrap(environment: 'development');
       await tester.pumpAndSettle();
@@ -65,8 +68,9 @@ void main() {
       expect(find.text('请输入有效的邮箱地址'), findsOneWidget);
     });
 
-    testWidgets('should show validation error for short password',
-        (WidgetTester tester) async {
+    testWidgets('should show validation error for short password', (
+      WidgetTester tester,
+    ) async {
       // Start the app
       await bootstrap(environment: 'development');
       await tester.pumpAndSettle();
@@ -90,8 +94,9 @@ void main() {
       expect(find.text('密码长度不能少于6位'), findsOneWidget);
     });
 
-    testWidgets('should toggle password visibility',
-        (WidgetTester tester) async {
+    testWidgets('should toggle password visibility', (
+      WidgetTester tester,
+    ) async {
       // Start the app
       await bootstrap(environment: 'development');
       await tester.pumpAndSettle();
@@ -120,8 +125,9 @@ void main() {
       expect(visibilityToggle, findsOneWidget);
     });
 
-    testWidgets('should navigate to forgot password page',
-        (WidgetTester tester) async {
+    testWidgets('should navigate to forgot password page', (
+      WidgetTester tester,
+    ) async {
       // Start the app
       await bootstrap(environment: 'development');
       await tester.pumpAndSettle();
