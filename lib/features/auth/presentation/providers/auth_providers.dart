@@ -7,6 +7,9 @@ import '../../domain/repositories/auth_repository.dart';
 import 'login_notifier.dart';
 import 'login_state.dart';
 
+export 'login_form_state.dart';
+export 'login_state.dart';
+
 /// Dio provider alias
 final dioProvider = dioClientProvider;
 

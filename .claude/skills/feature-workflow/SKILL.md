@@ -5,165 +5,228 @@ description: Flutter Feature 开发工作流，从数据获取到 UI 展示的�
 
 # Feature 开发工作流
 
-完整的 Feature 开发流程，确保代码分层清晰、UI 无硬编码。
+## 📌 快速参考
+
+### 开发流程
+
+```
+Domain → Data → Provider → UI → Route → L10n → 质量检查
+```
+
+### 核心原则
+
+| 原则 | 要求 |
+|------|------|
+| **无状态优先** | 使用 `ConsumerWidget`，不用 `StatefulWidget` |
+| **状态放 Riverpod** | 所有状态（含 UI 状态）放 Provider |
+| **UI 无硬编码** | 文本用 `l10n`，颜色用 `Theme`，间距用 `AppSpacing` |
+| **逻辑与 UI 分离** | 验证、业务逻辑、数据转换放 `domain/` 或 `provider/`，UI 层只做展示和映射 |
+
+### 目录结构
+
+```
+lib/features/<name>/
+├── domain/           # 纯 Dart，无 Flutter 依赖
+│   ├── entities/     # 业务实体（const, final, copyWith, ==）
+│   ├── repositories/ # 仓库接口（返回 Result<T>）
+│   └── validators/   # 字段验证器（可选）
+├── data/
+│   ├── datasources/  # 远程/本地数据源
+│   ├── models/       # DTO（fromJson, toJson, toEntity）
+│   └── repositories/ # 仓库实现（异常转 Failure）
+└── presentation/
+    ├── providers/    # 状态管理（sealed class 状态）
+    ├── pages/        # 页面容器
+    └── widgets/      # 视图组件
+```
+
+### 快速检查清单
+
+- [ ] Domain: 实体 immutable + copyWith + == + hashCode
+- [ ] Data: DTO 分离 + toEntity() + 异常转 Failure
+- [ ] Provider: sealed class 状态 (Initial/Loading/Loaded/Error)
+- [ ] UI: ConsumerWidget + 无硬编码 + switch 处理状态
+- [ ] Route: `buildXxxRoutes()` 注册到 router.dart
+- [ ] L10n: 添加到 arb 文件 + `flutter gen-l10n`
+- [ ] 质量: `flutter analyze` + `dart format` + `flutter test`
 
 ---
 
-## 🔄 工作流程图
+## 🔄 开发阶段
 
+### Phase 1: Domain 层
+
+**目的**：定义业务实体、仓库接口、验证器（纯 Dart）
+
+**产出物**：
+- `entities/<name>.dart` - 业务实体
+- `repositories/<name>_repository.dart` - 仓库接口
+- `validators/<name>_validators.dart` - 字段验证器（可选）
+
+**检查点**：
+- [ ] const 构造函数 + final 字段
+- [ ] copyWith + == + hashCode
+- [ ] 仓库接口返回 `Result<T>`
+- [ ] 无 `package:flutter` 导入
+
+> 详细模板见 [附录 A: Domain 层模板](#附录-a-domain-层模板)
+
+---
+
+### Phase 2: Data 层
+
+**目的**：实现数据源和仓库
+
+**产出物**：
+- `datasources/<name>_remote_data_source.dart`
+- `models/<name>_dto.dart`
+- `repositories/<name>_repository_impl.dart`
+
+**检查点**：
+- [ ] DTO 与 Entity 分离
+- [ ] fromJson / toJson / toEntity
+- [ ] 异常捕获 → `ErrorMapper.mapException()`
+
+> 详细模板见 [附录 B: Data 层模板](#附录-b-data-层模板)
+
+---
+
+### Phase 3: Provider 层
+
+**目的**：状态管理和业务逻辑
+
+**产出物**：
+- `providers/<name>_provider.dart` - 业务状态
+- `providers/<name>_form_state.dart` - 表单 UI 状态（可选）
+
+**检查点**：
+- [ ] sealed class 状态定义
+- [ ] Initial / Loading / Loaded / Error
+- [ ] Controller 继承 Notifier
+- [ ] 表单 UI 状态使用独立 Provider
+
+> 详细模板见 [附录 C: Provider 层模板](#附录-c-provider-层模板)
+
+---
+
+### Phase 4: UI 层
+
+**目的**：纯 UI 展示，无业务逻辑
+
+**产出物**：
+- `pages/<name>_page.dart` - 页面容器
+- `widgets/<name>_view.dart` - 视图组件
+
+**检查点**：
+- [ ] **使用 ConsumerWidget**（不用 StatefulWidget）
+- [ ] **状态来自 Provider**（含 UI 状态如 obscurePassword）
+- [ ] 文本 → `context.l10n.xxx`
+- [ ] 颜色 → `Theme.of(context)`
+- [ ] 间距 → `AppSpacing.xx`
+- [ ] switch 表达式处理状态
+- [ ] 验证错误类型 → 国际化文本映射
+
+> 详细模板见 [附录 D: UI 层模板](#附录-d-ui-层模板)
+
+---
+
+### Phase 5: 路由 & 国际化
+
+**路由**：
+```dart
+// presentation/routes.dart
+class XxxRoutes {
+  static const xxx = '/xxx';
+}
+
+List<GoRoute> buildXxxRoutes() => [
+  GoRoute(path: XxxRoutes.xxx, builder: (_, __) => const XxxPage()),
+];
+
+// 注册到 app/router.dart
+routes: [...buildXxxRoutes()],
 ```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                           Phase 0: 需求分析                                  │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐                          │
-│  │   文字描述   │  │  UI 截图    │  │  设计稿     │                          │
-│  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘                          │
-│         └────────────────┼────────────────┘                                 │
-│                          ▼                                                  │
-│              ┌───────────────────────┐                                      │
-│              │  提取: 实体 / API / UI │                                      │
-│              └───────────┬───────────┘                                      │
-└──────────────────────────┼──────────────────────────────────────────────────┘
-                           ▼
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                         Phase 1-4: 分层开发                                  │
-│                                                                             │
-│  ┌─────────┐    ┌─────────┐    ┌─────────┐    ┌─────────┐    ┌─────────┐   │
-│  │ Domain  │───▶│  Data   │───▶│Provider │───▶│   UI    │───▶│  Route  │   │
-│  │  实体    │    │ 数据源   │    │ 状态管理 │    │  页面   │    │  路由   │   │
-│  └────┬────┘    └────┬────┘    └────┬────┘    └────┬────┘    └────┬────┘   │
-│       │              │              │              │              │         │
-│       ▼              ▼              ▼              ▼              ▼         │
-│    [检查点]       [检查点]       [检查点]       [检查点]       [检查点]      │
-└──────────────────────────┬──────────────────────────────────────────────────┘
-                           ▼
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                         Phase 5: 质量检查                                    │
-│                                                                             │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐        │
-│  │   analyze   │  │   format    │  │    test     │  │   l10n      │        │
-│  └─────────────┘  └─────────────┘  └─────────────┘  └─────────────┘        │
-│                                                                             │
-│                    参考: .claude/skills/code-quality                        │
-└─────────────────────────────────────────────────────────────────────────────┘
+
+**国际化**：
+```bash
+# 1. 添加到 l10n/app_en.arb 和 l10n/app_zh.arb
+# 2. 生成
+flutter gen-l10n
 ```
 
 ---
 
-## 📋 Phase 0: 需求分析
+### Phase 6: 质量检查
 
-### 输入类型
-
-| 输入 | 分析要点 |
-|------|----------|
-| **文字描述** | 提取功能点、业务规则、数据流向 |
-| **UI 截图** | 识别组件结构、交互方式、状态变化 |
-| **设计稿** | 提取颜色/字体（映射到 Theme）、间距、组件层级 |
-
-### 分析输出
-
-```markdown
-## 需求分析结果
-
-### 1. 实体定义
-- 实体名称: User
-- 字段: id, name, email, avatar
-- 关联: UserRole (可选)
-
-### 2. API 接口
-- GET /users - 获取用户列表
-- GET /users/:id - 获取用户详情
-- POST /users - 创建用户
-
-### 3. UI 组件
-- UserListPage: 列表页面
-- UserListItem: 列表项组件
-- UserDetailPage: 详情页面
-
-### 4. 状态流转
-- Initial → Loading → Loaded/Error
-- 支持下拉刷新、分页加载
-
-### 5. 国际化文本
-- userListTitle: 用户列表
-- userDetailTitle: 用户详情
-- emptyList: 暂无用户
+```bash
+flutter analyze lib/features/<name>/         # 代码分析
+dart format lib/features/<name>/             # 格式化
+flutter test test/features/<name>/           # 测试
 ```
 
-### Phase 0 检查清单
-
-| 检查项 | 状态 |
-|--------|------|
-| ☐ 实体字段已明确 | |
-| ☐ API 接口已确认（或 mock 方案） | |
-| ☐ UI 组件层级已拆分 | |
-| ☐ 状态流转已定义 | |
-| ☐ 国际化 key 已规划 | |
+> 详细清单见 [附录 E: 质量检查清单](#附录-e-质量检查清单)
 
 ---
 
-## 🚫 核心原则：UI 层禁止硬编码
-
-### 禁止项
+## 🚫 常见错误示例
 
 ```dart
-// ❌ 禁止：硬编码文本
+// ❌ 错误：StatefulWidget 管理 UI 状态
+class LoginForm extends ConsumerStatefulWidget { ... }
+class _LoginFormState extends ConsumerState<LoginForm> {
+  bool _obscurePassword = true;  // 应放 Provider
+}
+
+// ❌ 错误：验证逻辑在 UI 层
+validator: (value) {
+  if (value == null || value.isEmpty) return '请输入';
+  final regex = RegExp(r'...');
+  if (!regex.hasMatch(value)) return '格式错误';
+}
+
+// ❌ 错误：硬编码
 Text('用户列表')
-
-// ❌ 禁止：硬编码颜色/尺寸
-Container(color: Color(0xFF2196F3), padding: EdgeInsets.all(16))
-
-// ❌ 禁止：模拟数据
-final users = [User(name: 'Test'), User(name: 'Demo')];
-
-// ❌ 禁止：魔法数字
+Container(color: Color(0xFF2196F3))
 SizedBox(height: 24)
 ```
 
-### 正确做法
-
 ```dart
-// ✅ 国际化文本
+// ✅ 正确：ConsumerWidget + Provider 状态
+class LoginForm extends ConsumerWidget {
+  Widget build(context, ref) {
+    final formState = ref.watch(loginFormProvider);
+    // formState.obscurePassword 来自 Provider
+  }
+}
+
+// ✅ 正确：验证逻辑在 Domain 层
+validator: (value) {
+  final error = AuthValidators.validateEmail(value);
+  return switch (error) {
+    EmailValidationError.required => l10n.emailRequired,
+    EmailValidationError.invalidFormat => l10n.emailInvalid,
+    null => null,
+  };
+}
+
+// ✅ 正确：使用主题和常量
 Text(context.l10n.userListTitle)
-
-// ✅ 主题颜色/间距
-Container(
-  color: Theme.of(context).colorScheme.primary,
-  padding: const EdgeInsets.all(AppSpacing.md),
-)
-
-// ✅ 从 Provider 获取数据
-final users = ref.watch(userListProvider);
-
-// ✅ 命名常量
+Container(color: Theme.of(context).colorScheme.primary)
 SizedBox(height: AppSpacing.lg)
 ```
 
 ---
 
-## 📁 开发顺序（自底向上）
+# 📎 附录
 
-### Step 1: Domain 层（纯 Dart）
+## 附录 A: Domain 层模板
 
-**目的**：定义业务实体和仓库接口
-
-```
-lib/features/<name>/domain/
-├── entities/
-│   └── <name>.dart          # 业务实体
-└── repositories/
-    └── <name>_repository.dart  # 仓库接口
-```
-
-**实体模板**：
+### 实体模板
 
 ```dart
 // domain/entities/user.dart
 class User {
-  const User({
-    required this.id,
-    required this.name,
-    required this.email,
-  });
+  const User({required this.id, required this.name, required this.email});
 
   final String id;
   final String name;
@@ -186,44 +249,51 @@ class User {
 }
 ```
 
-**仓库接口模板**：
+### 仓库接口模板
 
 ```dart
 // domain/repositories/user_repository.dart
-import '../entities/user.dart';
-import '../../../../core/utils/result.dart';
-
 abstract class UserRepository {
   Future<Result<List<User>>> getUsers();
   Future<Result<User>> getUserById(String id);
-  Future<Result<void>> saveUser(User user);
 }
+```
+
+### 验证器模板
+
+```dart
+// domain/validators/auth_validators.dart
+class AuthValidators {
+  AuthValidators._();
+
+  static const int minPasswordLength = 6;
+  static final RegExp _emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+
+  static EmailValidationError? validateEmail(String? value) {
+    if (value == null || value.isEmpty) return EmailValidationError.required;
+    if (!_emailRegex.hasMatch(value)) return EmailValidationError.invalidFormat;
+    return null;
+  }
+
+  static PasswordValidationError? validatePassword(String? value) {
+    if (value == null || value.isEmpty) return PasswordValidationError.required;
+    if (value.length < minPasswordLength) return PasswordValidationError.tooShort;
+    return null;
+  }
+}
+
+enum EmailValidationError { required, invalidFormat }
+enum PasswordValidationError { required, tooShort }
 ```
 
 ---
 
-### Step 2: Data 层
+## 附录 B: Data 层模板
 
-**目的**：实现数据源和仓库
-
-```
-lib/features/<name>/data/
-├── datasources/
-│   ├── <name>_remote_data_source.dart  # 网络数据源
-│   └── <name>_local_data_source.dart   # 本地数据源
-├── models/
-│   └── <name>_dto.dart                 # 数据传输对象
-└── repositories/
-    └── <name>_repository_impl.dart     # 仓库实现
-```
-
-**远程数据源模板**：
+### 远程数据源模板
 
 ```dart
 // data/datasources/user_remote_data_source.dart
-import '../../../../core/network/dio_client.dart';
-import '../models/user_dto.dart';
-
 abstract class UserRemoteDataSource {
   Future<List<UserDto>> getUsers();
   Future<UserDto> getUserById(String id);
@@ -231,15 +301,12 @@ abstract class UserRemoteDataSource {
 
 class UserRemoteDataSourceImpl implements UserRemoteDataSource {
   UserRemoteDataSourceImpl({required this.dioClient});
-
   final DioClient dioClient;
 
   @override
   Future<List<UserDto>> getUsers() async {
     final response = await dioClient.get('/users');
-    return (response.data as List)
-        .map((json) => UserDto.fromJson(json))
-        .toList();
+    return (response.data as List).map((json) => UserDto.fromJson(json)).toList();
   }
 
   @override
@@ -250,46 +317,34 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
 }
 ```
 
-**DTO 模板**：
+### DTO 模板
 
 ```dart
 // data/models/user_dto.dart
-import '../../domain/entities/user.dart';
-
 class UserDto {
   UserDto({required this.id, required this.name, required this.email});
 
-  factory UserDto.fromJson(Map<String, dynamic> json) {
-    return UserDto(
-      id: json['id'] as String,
-      name: json['name'] as String,
-      email: json['email'] as String,
-    );
-  }
+  factory UserDto.fromJson(Map<String, dynamic> json) => UserDto(
+    id: json['id'] as String,
+    name: json['name'] as String,
+    email: json['email'] as String,
+  );
 
   final String id;
   final String name;
   final String email;
 
   Map<String, dynamic> toJson() => {'id': id, 'name': name, 'email': email};
-
   User toEntity() => User(id: id, name: name, email: email);
 }
 ```
 
-**仓库实现模板**：
+### 仓库实现模板
 
 ```dart
 // data/repositories/user_repository_impl.dart
-import '../../../../core/error/error_mapper.dart';
-import '../../../../core/utils/result.dart';
-import '../../domain/entities/user.dart';
-import '../../domain/repositories/user_repository.dart';
-import '../datasources/user_remote_data_source.dart';
-
 class UserRepositoryImpl implements UserRepository {
   UserRepositoryImpl({required this.remoteDataSource});
-
   final UserRemoteDataSource remoteDataSource;
 
   @override
@@ -301,79 +356,28 @@ class UserRepositoryImpl implements UserRepository {
       return Err(ErrorMapper.mapException(e));
     }
   }
-
-  @override
-  Future<Result<User>> getUserById(String id) async {
-    try {
-      final dto = await remoteDataSource.getUserById(id);
-      return Success(dto.toEntity());
-    } catch (e) {
-      return Err(ErrorMapper.mapException(e));
-    }
-  }
-
-  @override
-  Future<Result<void>> saveUser(User user) async {
-    // 实现保存逻辑
-    return const Success(null);
-  }
 }
 ```
 
 ---
 
-### Step 3: Presentation 层 - Provider
+## 附录 C: Provider 层模板
 
-**目的**：状态管理和业务逻辑
-
-```
-lib/features/<name>/presentation/
-└── providers/
-    └── <name>_provider.dart
-```
-
-**Provider 模板（异步数据）**：
+### 业务状态 Provider
 
 ```dart
 // presentation/providers/user_provider.dart
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-import '../../../../app/di.dart';
-import '../../data/datasources/user_remote_data_source.dart';
-import '../../data/repositories/user_repository_impl.dart';
-import '../../domain/entities/user.dart';
-import '../../domain/repositories/user_repository.dart';
-
-// 数据源 Provider
-final userRemoteDataSourceProvider = Provider<UserRemoteDataSource>((ref) {
-  return UserRemoteDataSourceImpl(dioClient: ref.watch(dioClientProvider));
-});
-
-// 仓库 Provider
-final userRepositoryProvider = Provider<UserRepository>((ref) {
-  return UserRepositoryImpl(
-    remoteDataSource: ref.watch(userRemoteDataSourceProvider),
-  );
-});
 
 // 状态定义
 sealed class UserListState {
   const UserListState();
 }
-
-class UserListInitial extends UserListState {
-  const UserListInitial();
-}
-
-class UserListLoading extends UserListState {
-  const UserListLoading();
-}
-
+class UserListInitial extends UserListState { const UserListInitial(); }
+class UserListLoading extends UserListState { const UserListLoading(); }
 class UserListLoaded extends UserListState {
   const UserListLoaded(this.users);
   final List<User> users;
 }
-
 class UserListError extends UserListState {
   const UserListError(this.message);
   final String message;
@@ -381,59 +385,65 @@ class UserListError extends UserListState {
 
 // Controller
 final userListControllerProvider =
-    NotifierProvider<UserListController, UserListState>(
-  UserListController.new,
-);
+    NotifierProvider<UserListController, UserListState>(UserListController.new);
 
 class UserListController extends Notifier<UserListState> {
   @override
   UserListState build() {
-    // 初始化时加载数据
     Future.microtask(loadUsers);
     return const UserListLoading();
   }
 
-  UserRepository get _repository => ref.read(userRepositoryProvider);
-
   Future<void> loadUsers() async {
     state = const UserListLoading();
-    final result = await _repository.getUsers();
+    final result = await ref.read(userRepositoryProvider).getUsers();
     result.when(
       success: (users) => state = UserListLoaded(users),
       failure: (failure) => state = UserListError(failure.message),
     );
   }
+}
+```
 
-  Future<void> refresh() async {
-    await loadUsers();
+### 表单状态 Provider
+
+```dart
+// presentation/providers/login_form_state.dart
+class LoginFormState {
+  const LoginFormState({this.email = '', this.password = '', this.obscurePassword = true});
+  final String email;
+  final String password;
+  final bool obscurePassword;
+
+  LoginFormState copyWith({String? email, String? password, bool? obscurePassword}) {
+    return LoginFormState(
+      email: email ?? this.email,
+      password: password ?? this.password,
+      obscurePassword: obscurePassword ?? this.obscurePassword,
+    );
   }
 }
+
+class LoginFormNotifier extends Notifier<LoginFormState> {
+  @override
+  LoginFormState build() => const LoginFormState();
+
+  void setEmail(String value) => state = state.copyWith(email: value);
+  void setPassword(String value) => state = state.copyWith(password: value);
+  void togglePasswordVisibility() => state = state.copyWith(obscurePassword: !state.obscurePassword);
+}
+
+final loginFormProvider = NotifierProvider<LoginFormNotifier, LoginFormState>(LoginFormNotifier.new);
 ```
 
 ---
 
-### Step 4: Presentation 层 - UI
+## 附录 D: UI 层模板
 
-**目的**：纯 UI 展示，无业务逻辑
-
-```
-lib/features/<name>/presentation/
-├── pages/
-│   └── <name>_page.dart      # 页面容器
-└── widgets/
-    └── <name>_view.dart      # 视图组件
-```
-
-**Page 模板**：
+### Page 模板
 
 ```dart
 // presentation/pages/user_list_page.dart
-import 'package:flutter/material.dart';
-
-import '../../../../core/l10n/l10n.dart';
-import '../../../../core/widgets/app_scaffold.dart';
-import '../widgets/user_list_view.dart';
-
 class UserListPage extends StatelessWidget {
   const UserListPage({super.key});
 
@@ -447,19 +457,10 @@ class UserListPage extends StatelessWidget {
 }
 ```
 
-**View 模板（处理状态）**：
+### View 模板（处理状态）
 
 ```dart
 // presentation/widgets/user_list_view.dart
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-import '../../../../core/l10n/l10n.dart';
-import '../../../../core/widgets/error_view.dart';
-import '../../../../core/widgets/loading_indicator.dart';
-import '../providers/user_provider.dart';
-import 'user_list_item.dart';
-
 class UserListView extends ConsumerWidget {
   const UserListView({super.key});
 
@@ -472,50 +473,63 @@ class UserListView extends ConsumerWidget {
       UserListLoading() => const LoadingIndicator(),
       UserListError(:final message) => ErrorView(
           message: message,
-          onRetry: () => ref.read(userListControllerProvider.notifier).refresh(),
+          onRetry: () => ref.read(userListControllerProvider.notifier).loadUsers(),
         ),
       UserListLoaded(:final users) => users.isEmpty
           ? Center(child: Text(context.l10n.emptyList))
-          : RefreshIndicator(
-              onRefresh: () =>
-                  ref.read(userListControllerProvider.notifier).refresh(),
-              child: ListView.builder(
-                itemCount: users.length,
-                itemBuilder: (context, index) => UserListItem(user: users[index]),
-              ),
+          : ListView.builder(
+              itemCount: users.length,
+              itemBuilder: (context, index) => UserListItem(user: users[index]),
             ),
     };
   }
 }
 ```
 
-**Item 模板**：
+### 表单组件模板（无状态）
 
 ```dart
-// presentation/widgets/user_list_item.dart
-import 'package:flutter/material.dart';
-
-import '../../domain/entities/user.dart';
-
-class UserListItem extends StatelessWidget {
-  const UserListItem({super.key, required this.user});
-
-  final User user;
+// presentation/widgets/login_form.dart
+class LoginForm extends ConsumerWidget {
+  const LoginForm({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+  Widget build(BuildContext context, WidgetRef ref) {
+    final formState = ref.watch(loginFormProvider);  // 状态来自 Provider
+    final isLoading = ref.watch(loginProvider) is LoginLoading;
 
-    return ListTile(
-      leading: CircleAvatar(
-        backgroundColor: theme.colorScheme.primaryContainer,
-        child: Text(
-          user.name.isNotEmpty ? user.name[0].toUpperCase() : '?',
-          style: TextStyle(color: theme.colorScheme.onPrimaryContainer),
+    return Column(
+      children: [
+        _EmailField(
+          value: formState.email,
+          enabled: !isLoading,
+          onChanged: ref.read(loginFormProvider.notifier).setEmail,
         ),
+        const SizedBox(height: AppSpacing.md),
+        _PasswordField(
+          value: formState.password,
+          obscureText: formState.obscurePassword,  // UI 状态也在 Provider
+          onToggleVisibility: ref.read(loginFormProvider.notifier).togglePasswordVisibility,
+          ...
+        ),
+      ],
+    );
+  }
+}
+
+// 叶子组件：验证错误类型 → 国际化文本映射
+class _EmailField extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final error = value.isEmpty ? null : AuthValidators.validateEmail(value);
+    return TextFormField(
+      decoration: InputDecoration(
+        errorText: switch (error) {
+          EmailValidationError.required => context.l10n.emailRequired,
+          EmailValidationError.invalidFormat => context.l10n.emailInvalid,
+          null => null,
+        },
       ),
-      title: Text(user.name, style: theme.textTheme.titleMedium),
-      subtitle: Text(user.email, style: theme.textTheme.bodySmall),
     );
   }
 }
@@ -523,261 +537,55 @@ class UserListItem extends StatelessWidget {
 
 ---
 
-### Step 5: 路由配置
+## 附录 E: 质量检查清单
 
-```dart
-// presentation/routes.dart
-import 'package:go_router/go_router.dart';
+### 静态分析
 
-import 'pages/user_list_page.dart';
+| 检查项 | 命令 |
+|--------|------|
+| 无 analyze 错误 | `flutter analyze` |
+| 无 analyze 警告 | `flutter analyze --fatal-infos` |
+| 代码格式正确 | `dart format --set-exit-if-changed .` |
 
-class UserRoutes {
-  UserRoutes._();
+### 测试覆盖
 
-  static const String userList = '/users';
-  static const String userDetail = '/users/:id';
-}
+| 检查项 |
+|--------|
+| Domain 层单元测试 |
+| Provider/Controller 测试 |
+| 测试全部通过 |
 
-List<GoRoute> buildUserRoutes() => [
-  GoRoute(
-    path: UserRoutes.userList,
-    builder: (context, state) => const UserListPage(),
-  ),
-];
-```
+### 安全检查
 
-**注册到 app/router.dart**：
+| 检查项 |
+|--------|
+| 无硬编码 API 密钥/Token |
+| 敏感数据使用 SecureStorage |
+| 网络请求使用 HTTPS |
 
-```dart
-import '../features/user/presentation/routes.dart';
+### 性能检查
 
-final routerProvider = Provider<GoRouter>((ref) => GoRouter(
-  routes: [
-    ...buildUserRoutes(),
-    // 其他路由...
-  ],
-));
-```
+| 检查项 | 标准 |
+|--------|------|
+| 单文件行数 | < 500 行 |
+| Widget 嵌套层级 | < 10 层 |
+| 列表使用 ListView.builder | - |
+| 使用 const 构造函数 | - |
 
 ---
 
-### Step 6: 国际化
-
-**添加到 l10n/app_en.arb**：
-
-```json
-{
-  "userListTitle": "Users",
-  "emptyList": "No data available"
-}
-```
-
-**添加到 l10n/app_zh.arb**：
-
-```json
-{
-  "userListTitle": "用户列表",
-  "emptyList": "暂无数据"
-}
-```
-
-**生成**：
+## 🔧 命令速查
 
 ```bash
-flutter gen-l10n
-```
-
----
-
-## ✅ 各阶段检查清单
-
-### Phase 1: Domain 检查点
-
-| 检查项 | 状态 |
-|--------|------|
-| ☐ 实体类使用 `const` 构造函数 | |
-| ☐ 所有字段使用 `final` | |
-| ☐ 实现 `copyWith` 方法 | |
-| ☐ 重写 `==` 和 `hashCode` | |
-| ☐ 仓库接口返回 `Result<T>` | |
-| ☐ 无 Flutter 依赖（纯 Dart） | |
-
-### Phase 2: Data 检查点
-
-| 检查项 | 状态 |
-|--------|------|
-| ☐ DTO 与 Entity 分离 | |
-| ☐ `fromJson` / `toJson` 实现完整 | |
-| ☐ `toEntity()` 转换方法 | |
-| ☐ 数据源接口 + 实现分离 | |
-| ☐ 异常捕获并转换为 `Failure` | |
-| ☐ 使用 `ErrorMapper.mapException()` | |
-
-### Phase 3: Provider 检查点
-
-| 检查项 | 状态 |
-|--------|------|
-| ☐ 状态使用 `sealed class` 定义 | |
-| ☐ 包含 Initial/Loading/Loaded/Error 状态 | |
-| ☐ Controller 继承 `Notifier` 或 `AsyncNotifier` | |
-| ☐ 数据加载在 Controller 中完成 | |
-| ☐ Provider 依赖链正确（DataSource → Repository → Controller） | |
-
-### Phase 4: UI 检查点
-
-| 检查项 | 状态 |
-|--------|------|
-| ☐ 文本使用 `context.l10n.xxx`（无硬编码） | |
-| ☐ 颜色使用 `Theme.of(context)`（无硬编码） | |
-| ☐ 间距使用命名常量（无魔法数字） | |
-| ☐ 数据来自 Provider（无模拟数据） | |
-| ☐ Page 与 View/Item 组件分离 | |
-| ☐ 使用 `switch` 表达式处理状态 | |
-| ☐ Loading/Error/Empty 状态 UI 完整 | |
-| ☐ 使用 `const` 构造函数 | |
-
-### Phase 4.5: Route & L10n 检查点
-
-| 检查项 | 状态 |
-|--------|------|
-| ☐ 路由常量定义在 `routes.dart` | |
-| ☐ `buildXxxRoutes()` 函数已导出 | |
-| ☐ 路由已注册到 `app/router.dart` | |
-| ☐ 国际化 key 已添加到 `app_en.arb` | |
-| ☐ 国际化 key 已添加到 `app_zh.arb` | |
-| ☐ 已运行 `flutter gen-l10n` | |
-
----
-
-## 🔍 Phase 5: 质量检查
-
-> 参考: `.claude/skills/code-quality/SKILL.md`
-
-### 执行命令
-
-```bash
-# 1. 代码分析（必须通过）
-flutter analyze --fatal-infos
-
-# 2. 格式检查（必须通过）
-dart format --set-exit-if-changed .
-
-# 3. 运行测试（必须通过）
-flutter test test/features/<name>/
-
-# 4. 生成国际化（如有变更）
-flutter gen-l10n
-
-# 5. 依赖检查（建议）
-flutter pub outdated
-```
-
-### Phase 5 检查清单
-
-#### 5.1 静态分析
-
-| 检查项 | 命令 | 状态 |
-|--------|------|------|
-| ☐ 无 analyze 错误 | `flutter analyze` | |
-| ☐ 无 analyze 警告 | `flutter analyze --fatal-infos` | |
-| ☐ 代码格式正确 | `dart format --set-exit-if-changed .` | |
-
-#### 5.2 测试覆盖
-
-| 检查项 | 状态 |
-|--------|------|
-| ☐ Domain 层单元测试 | |
-| ☐ Provider/Controller 测试 | |
-| ☐ 测试全部通过 | |
-
-#### 5.3 安全检查
-
-| 检查项 | 状态 |
-|--------|------|
-| ☐ 无硬编码 API 密钥/Token | |
-| ☐ 无硬编码密码/Secret | |
-| ☐ 敏感数据使用 `SecureStorage` | |
-| ☐ 网络请求使用 HTTPS | |
-| ☐ 无敏感信息在日志中输出 | |
-
-#### 5.4 性能检查
-
-| 检查项 | 标准 | 状态 |
-|--------|------|------|
-| ☐ 单文件行数 | < 500 行 | |
-| ☐ Widget 嵌套层级 | < 10 层 | |
-| ☐ 列表使用 `ListView.builder` | - | |
-| ☐ 使用 `const` 构造函数 | - | |
-| ☐ 避免在 `build` 中创建大对象 | - | |
-
-#### 5.5 代码规范
-
-| 检查项 | 状态 |
-|--------|------|
-| ☐ 文件命名 `snake_case` | |
-| ☐ 类命名 `PascalCase` | |
-| ☐ 私有成员 `_` 前缀 | |
-| ☐ 导入语句已排序 | |
-| ☐ 无未使用的导入/变量 | |
-
-### 质量检查自动化（推荐）
-
-使用子代理执行完整质量检查：
-
-```typescript
-Task({
-  subagent_type: 'general-purpose',
-  description: '运行 Feature 质量检查',
-  prompt: `
-对 lib/features/<name>/ 执行完整质量检查：
-
-1. flutter analyze lib/features/<name>/
-2. dart format --set-exit-if-changed lib/features/<name>/
-3. flutter test test/features/<name>/
-
-如有错误，分析并修复，再次验证直到全部通过。
-返回检查结果摘要。
-
-遵循 .claude/skills/code-quality/SKILL.md 中的规范。
-  `,
-})
-```
-
----
-
-## 📋 完整检查清单汇总
-
-| 阶段 | 核心检查项 |
-|------|-----------|
-| Phase 0 | 需求分析完整（实体/API/UI/状态/L10n） |
-| Phase 1 | Domain 纯 Dart，immutable 实体 |
-| Phase 2 | Data DTO 分离，异常转 Failure |
-| Phase 3 | Provider sealed class 状态 |
-| Phase 4 | UI 无硬编码，数据来自 Provider |
-| Phase 4.5 | 路由注册，国际化完成 |
-| Phase 5 | analyze + format + test 全通过 |
-
----
-
-## 🔧 常用命令速查
-
-```bash
-# 开发流程
-flutter pub get                              # 获取依赖
-flutter gen-l10n                             # 生成国际化
+# 开发
+flutter pub get                    # 获取依赖
+flutter gen-l10n                   # 生成国际化
 
 # 质量检查
-flutter analyze                              # 代码分析
-flutter analyze lib/features/<name>/         # 分析指定 feature
-dart format .                                # 格式化
-dart format lib/features/<name>/             # 格式化指定 feature
-
-# 测试
-flutter test                                 # 全部测试
-flutter test test/features/<name>/           # Feature 测试
-flutter test --coverage                      # 覆盖率报告
+flutter analyze                    # 代码分析
+dart format .                      # 格式化
+flutter test                       # 测试
 
 # 依赖
-flutter pub outdated                         # 检查过期依赖
-flutter pub upgrade                          # 升级依赖
+flutter pub outdated               # 检查过期依赖
 ```

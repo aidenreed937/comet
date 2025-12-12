@@ -3,257 +3,191 @@ name: git-github
 description: Flutter 项目的 Git 和 GitHub 操作，包括分支管理、提交、推送、创建仓库、Pull Request、合并流程。当用户提到"git"、"github"、"提交"、"推送"、"分支"、"PR"、"合并"、"仓库"、"rebase"时使用此 skill。
 ---
 
-# Git 和 GitHub 操作 (Flutter 项目)
+# Git 和 GitHub 操作
 
 提供 Flutter 项目的 Git 版本控制和 GitHub 仓库管理的完整工作流。
 
-## 🤖 使用子代理执行（强烈推荐）
+## 快速参考
 
-**为避免消耗主窗口上下文，所有 Git 操作应通过子代理执行**
+### 核心原则
 
-### 为什么使用子代理
+| 原则 | 说明 |
+|------|------|
+| **禁止直接 push main** | main 只能通过 PR 合并 |
+| **先 rebase 后 PR** | 保持线性历史 |
+| **质量门禁** | 合并前必须通过 analyze + test |
 
-Git 操作（尤其是提交、PR 创建）需要：
+### 分支命名
 
-- 读取 `git status`、`git diff`、`git log` 输出（大量 token）
-- 分析变更内容、编写提交信息（上下文推理）
-- 处理完后这些中间信息不再需要保留
+| 前缀 | 用途 | 示例 |
+|------|------|------|
+| `feature/` | 新功能 | `feature/user-auth` |
+| `fix/` | Bug 修复 | `fix/login-bug` |
+| `hotfix/` | 紧急修复 | `hotfix/critical-bug` |
+| `refactor/` | 重构 | `refactor/auth-module` |
 
-**使用子代理的好处**：
-
-- ✅ 节省主窗口 50-80% 的上下文消耗
-- ✅ 保持主对话历史简洁
-- ✅ Git 操作结果简洁返回，不污染主上下文
-- ✅ 多个 Git 任务可并行执行
-
-### 如何触发子代理
-
-**用户请求示例**（会自动触发此 skill）：
+### 提交格式
 
 ```
-"git提交当前分支的变更"
-"创建PR合并到main"
-"rebase到最新main分支"
-"推送代码到远程"
+<type>(<scope>): <subject>
+
+类型: feat | fix | docs | style | refactor | perf | test | build | ci | chore
 ```
 
-**Claude 行为**：
+### 常用命令速查
 
-1. **自动使用 Task 工具** 启动 `general-purpose` 子代理
-2. 子代理在独立上下文中执行所有 Git 操作
-3. 完成后向主窗口返回简洁结果（提交 hash、PR URL 等）
-4. 主窗口继续保持低上下文消耗
+```bash
+# 分支
+git checkout -b feature/xxx          # 创建分支
+git branch -d feature/xxx            # 删除分支
 
-### 子代理执行模板
+# Rebase
+git fetch origin develop && git rebase origin/develop
 
-当收到 Git 操作请求时，应该：
+# 推送
+git push -u origin feature/xxx       # 首次推送
+git push --force-with-lease          # rebase 后推送
 
-```typescript
-// ❌ 错误：直接在主窗口执行
-Bash('git status')
-Bash('git diff')
-// ... 消耗大量主窗口 token
-
-// ✅ 正确：启动子代理执行
-Task({
-  subagent_type: 'general-purpose',
-  description: '提交当前分支变更',
-  prompt: `
-请执行以下 Git 操作：
-
-1. 查看当前变更状态（git status、git diff）
-2. 分析变更内容并编写符合规范的提交信息
-3. 使用 Conventional Commits 格式创建提交
-4. 添加 Claude Code 签名
-5. 返回提交 hash 和摘要
-
-遵循 .claude/skills/git-github/SKILL.md 中的规范。
-  `,
-})
+# PR
+gh pr create --base develop          # 创建 PR
+gh pr merge <n> --squash --delete-branch  # 合并
 ```
-
-### 适合子代理执行的任务
-
-| Git 操作                 | 推荐方式  | 原因                                        |
-| ------------------------ | --------- | ------------------------------------------- |
-| 提交变更 (`git commit`)  | 🤖 子代理 | 需读取 diff、status、log，消耗大量 token    |
-| 创建 PR (`gh pr create`) | 🤖 子代理 | 需分析完整变更历史，编写 PR 描述            |
-| Rebase 操作              | 🤖 子代理 | 可能需处理冲突，中间状态复杂                |
-| 合并分支                 | 🤖 子代理 | 同上                                        |
-| 查看简单状态             | 📝 主窗口 | 输出少（如 `git branch`、`gh auth status`） |
 
 ---
 
-## ⚠️ 核心原则
+## 子代理执行（强烈推荐）
 
-**禁止直接修改 main 分支！**
+**Git 操作应通过子代理执行**：
 
-- main 分支只能通过 PR 合并，不允许直接 push
-- 合并前必须：
-  1. ✅ 通过质量检测
-  2. ✅ 无冲突（已 rebase 到最新 main）
-  3. ✅ PR 审核通过
-- 使用 rebase merge 保持提交历史整洁
-
-## 分支命名规范
-
-- `main` - 主分支，保持稳定可发布状态，只接受来自 develop 的 PR
-- `develop` - 开发分支，日常开发的集成分支，feature 分支合并到此
-- `feature/<name>` - 功能分支，从 develop 创建，如 `feature/user-auth`
-- `fix/<name>` - 修复分支，从 develop 创建，如 `fix/login-bug`
-- `hotfix/<name>` - 紧急修复分支，从 main 创建，合并到 main 和 develop
-- `refactor/<name>` - 重构分支
-- `docs/<name>` - 文档更新分支
-
-### 分支流向
-
-```
-feature/xxx ─┐
-fix/xxx ─────┼──► develop ──► main (发布)
-refactor/xxx ┘        ▲
-                      │
-hotfix/xxx ───────────┴──► main
+```typescript
+Task({
+  subagent_type: 'general-purpose',
+  description: '提交当前分支变更',
+  prompt: `执行 Git 提交，遵循 .claude/skills/git-github/SKILL.md`,
+})
 ```
 
-## Feature 分支合并流程
+**原因**：Git 操作需读取 diff/status/log（消耗大量 token），子代理可隔离处理。
 
-**原则：先 rebase，后 PR，保持线性历史**
+---
 
-### 完整流程（Feature → Develop）
+## 工作流程
+
+### Feature 分支流程
 
 ```bash
-# 1. 从 develop 创建功能分支
-git checkout develop
-git pull origin develop
-git checkout -b feature/your-feature
+# 1. 从 develop 创建分支
+git checkout develop && git pull
+git checkout -b feature/xxx
 
-# 2. 开发过程中定期同步 develop
+# 2. 开发完成后同步 develop
 git fetch origin develop
 git rebase origin/develop
 
-# 3. 完成开发后确保代码质量
-flutter analyze
-dart format .
-flutter test
+# 3. 质量检查
+flutter analyze && flutter test
 
-# 4. Rebase 到最新 develop
-git fetch origin develop
-git rebase origin/develop
+# 4. 推送并创建 PR
+git push --force-with-lease origin feature/xxx
+gh pr create --base develop --title "feat: xxx"
 
-# 5. 解决冲突（如有）
-# 编辑冲突文件后：
-git add <conflicted-files>
-git rebase --continue
-
-# 6. 强制推送（rebase 后必须 force push）
-git push --force-with-lease origin feature/your-feature
-
-# 7. 创建 PR（目标分支：develop）
-gh pr create --base develop --head feature/your-feature \
-  --title "feat: 功能描述" \
-  --body "$(cat <<'EOF'
-## Summary
-- 变更点1
-- 变更点2
-
-## Test plan
-- [ ] 测试项1
-- [ ] 测试项2
-
-🤖 Generated with [Claude Code](https://claude.com/claude-code)
-EOF
-)"
-
-# 8. 合并前检查清单
-# ✅ flutter analyze 通过
-# ✅ flutter test 通过
-# ✅ 已 rebase 到最新 develop，无冲突
-# ✅ PR 已创建并审核通过
-
-# 9. 合并 PR（推荐 squash merge）
-gh pr merge <pr-number> --squash --delete-branch
-
-# 10. 合并后清理
-git checkout develop
-git pull origin develop
+# 5. 合并
+gh pr merge <n> --squash --delete-branch
 ```
 
 ### 发布流程（Develop → Main）
 
-当 develop 分支功能稳定，准备发布时：
-
 ```bash
 # 1. 确保 develop 最新
-git checkout develop
-git pull origin develop
+git checkout develop && git pull
 
-# 2. 运行完整质量检测
-flutter analyze
-dart format .
-flutter test
+# 2. 质量检查
+flutter analyze && flutter test
 
 # 3. 创建发布 PR
-gh pr create --base main --head develop \
-  --title "release: v1.x.x 版本发布" \
-  --body "$(cat <<'EOF'
-## Summary
-- 功能1
-- 功能2
-- 修复1
+gh pr create --base main --head develop --title "release: v1.x.x"
 
-## Test plan
-- [ ] 全量测试通过
-- [ ] 构建验证通过
+# 4. 合并到 main
+gh pr merge <n> --rebase
 
-🤖 Generated with [Claude Code](https://claude.com/claude-code)
-EOF
-)"
-
-# 4. 合并到 main（使用 rebase merge 保持历史）
-gh pr merge <pr-number> --rebase
-
-# 5. 打 tag（可选）
-git checkout main
-git pull origin main
+# 5. 打 tag
+git checkout main && git pull
 git tag -a v1.x.x -m "Release v1.x.x"
 git push origin v1.x.x
 ```
 
-## 提交信息规范
-
-**格式**：`<type>(<scope>): <subject>`
-
-### 类型说明
-
-| 类型     | 说明                    |
-| -------- | ----------------------- |
-| feat     | 新功能                  |
-| fix      | 修复 bug                |
-| docs     | 文档变更                |
-| style    | 代码格式（不影响逻辑）  |
-| refactor | 重构（非新功能/非修复） |
-| perf     | 性能优化                |
-| test     | 测试相关                |
-| build    | 构建/依赖变更           |
-| ci       | CI 配置变更             |
-| chore    | 其他杂项                |
-
-### 提交示例
+### Hotfix 流程
 
 ```bash
-# 简单提交
-git commit -m "feat: 添加用户登录功能"
+# 1. 从 main 创建
+git checkout main && git pull
+git checkout -b hotfix/xxx
 
-# 带 scope
-git commit -m "fix(api): 修复请求超时处理"
+# 2. 修复后创建 PR 到 main
+gh pr create --base main
 
-# 完整提交（使用 HEREDOC）
+# 3. 合并后同步到 develop
+git checkout develop && git merge main && git push
+```
+
+---
+
+## PR 规范
+
+### 标题格式
+
+```
+<type>(<scope>): <description>
+```
+
+### 内容模板
+
+```markdown
+## Summary
+- 变更点 1
+- 变更点 2
+
+## Test plan
+- [ ] 验证项 1
+- [ ] 验证项 2
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+```
+
+---
+
+## 冲突解决
+
+| 文件类型 | 策略 |
+|----------|------|
+| `pubspec.yaml` | 保留较新版本 |
+| `pubspec.lock` | 选择一方后重新 `flutter pub get` |
+| 代码文件 | 根据业务逻辑手动合并 |
+| 配置文件 | 优先保留 main 结构 |
+
+---
+
+## 安全提醒
+
+| 禁止 | 替代方案 |
+|------|----------|
+| 直接 push main | 通过 PR 合并 |
+| 合并未通过检测的代码 | 先 `flutter analyze && flutter test` |
+| `--force` 推送 main | 使用 `--force-with-lease`（仅 feature 分支） |
+| 提交敏感信息 | 使用 `.gitignore` 排除 |
+
+---
+
+## 附录
+
+### A. 完整提交示例
+
+```bash
 git commit -m "$(cat <<'EOF'
 feat(auth): 添加 JWT token 刷新机制
 
 - 添加 token 过期检测
 - 实现自动刷新逻辑
-- 更新请求拦截器
 
 Closes #123
 
@@ -264,156 +198,27 @@ EOF
 )"
 ```
 
-## 冲突解决策略
-
-1. **pubspec.yaml 冲突**：保留较新的依赖版本，确保兼容性
-2. **pubspec.lock 冲突**：选择一方后重新 `flutter pub get` 生成
-3. **代码冲突**：根据业务逻辑手动合并，保留两边有用的改动
-4. **配置文件冲突**：优先保留 main 分支的结构，合并 feature 的新增内容
-5. **资源文件冲突**：检查 assets 和图片文件，避免覆盖
-
-## PR 规范
-
-### 标题格式
-
-```
-<type>(<scope>): <description>
-```
-
-示例：
-
-- `feat: 添加用户认证模块`
-- `fix(auth): 修复登录状态丢失问题`
-- `docs: 更新 README 安装说明`
-
-### PR 内容模板
-
-```markdown
-## Summary
-
-- 简要描述变更内容（1-3 点）
-
-## Test plan
-
-- [ ] 验证项1
-- [ ] 验证项2
-
-🤖 Generated with [Claude Code](https://claude.com/claude-code)
-```
-
-## GitHub 操作 (gh CLI)
-
-### 认证检查
+### B. GitHub CLI 命令
 
 ```bash
+# 认证
 gh auth status
-```
 
-### 创建仓库
+# 仓库
+gh repo create <name> --private --source=. --push
 
-```bash
-# 创建私有仓库并推送
-gh repo create <repo-name> --private --source=. --push
-
-# 创建公开仓库
-gh repo create <repo-name> --public --source=. --push
-
-# 设置默认分支
-gh repo edit --default-branch main
-```
-
-### PR 操作
-
-```bash
-# 列出 PR
+# PR
 gh pr list
-
-# 查看 PR 详情
-gh pr view <pr-number>
-
-# 查看 PR 状态（JSON 格式）
-gh pr view <pr-number> --json state,mergedAt
-
-# Squash 合并并删除分支
-gh pr merge <pr-number> --squash --delete-branch
-
-# 普通合并
-gh pr merge <pr-number> --merge
-
-# Rebase 合并
-gh pr merge <pr-number> --rebase
+gh pr view <n>
+gh pr merge <n> --squash --delete-branch
 ```
 
-## 紧急修复流程
+### C. 分支流向图
 
-```bash
-# 从 main 创建 hotfix 分支
-git checkout main
-git pull origin main
-git checkout -b hotfix/critical-bug
-
-# 修复后推送并创建 PR 到 main
-git push -u origin hotfix/critical-bug
-gh pr create --base main --title "hotfix: 紧急修复描述"
-
-# 合并到 main
-gh pr merge <pr-number> --rebase --delete-branch
-
-# 同步 hotfix 到 develop（重要！）
-git checkout develop
-git pull origin develop
-git merge main
-git push origin develop
-
-# 如果有正在进行的 feature 分支，需要 rebase
-git checkout feature/xxx
-git rebase develop
 ```
-
-## 常用命令速查
-
-### 分支管理
-
-```bash
-git branch -a                    # 查看所有分支
-git checkout -b feature/xxx      # 创建并切换分支
-git branch -d feature/xxx        # 删除本地分支
-git branch -m master main        # 重命名分支
+feature/xxx ─┐
+fix/xxx ─────┼──► develop ──► main (发布)
+refactor/xxx ┘        ▲
+                      │
+hotfix/xxx ───────────┴──► main
 ```
-
-### 远程操作
-
-```bash
-git remote -v                    # 查看远程仓库
-git push -u origin main          # 推送并设置上游
-git push --force-with-lease      # 安全强制推送
-git pull --rebase origin main    # 拉取并 rebase
-```
-
-### 撤销操作
-
-```bash
-git reset --soft HEAD~1          # 撤销提交，保留更改
-git reset --hard HEAD~1          # 完全撤销（慎用）
-git commit --amend -m "新消息"    # 修改最近提交信息
-```
-
-### 查看历史
-
-```bash
-git log --oneline -10            # 简洁历史
-git log --oneline --graph --all  # 图形化历史
-git diff main..HEAD              # 查看与 main 的差异
-```
-
-## 安全提醒
-
-- **🚫 禁止直接 push 到 main 分支** - 只能通过 PR 合并
-- **🚫 禁止合并未通过质量检测的代码** - 必须先 `flutter analyze` 和 `flutter test`
-- **🚫 禁止合并有冲突的 PR** - 必须先 rebase 解决冲突
-- **永远不要** 提交敏感信息 (.env, android/key.properties, ios/*.p12 等)
-- **永远不要** 对 main/master 使用 `--force` 推送
-- **永远不要** 修改已推送到远程的公共分支历史
-- **永远不要** 提交 build/ 目录和编译产物
-- 使用 `--force-with-lease` 代替 `--force`（仅限 feature 分支）
-- 使用 `.gitignore` 排除不需要版本控制的文件（build/, .dart_tool/, *.g.dart 等）

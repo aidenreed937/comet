@@ -5,6 +5,13 @@ class LoginCredentials {
   final String email;
   final String password;
 
+  LoginCredentials copyWith({String? email, String? password}) {
+    return LoginCredentials(
+      email: email ?? this.email,
+      password: password ?? this.password,
+    );
+  }
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||

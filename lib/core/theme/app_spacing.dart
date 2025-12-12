@@ -19,6 +19,9 @@ class AppSpacing {
   static const double xxl = 48; // 12x
   static const double xxxl = 64; // 16x
 
+  // Additional spacing for specific use cases
+  static const double xl2 = 40; // 10x - for section gaps
+
   // Component-specific spacing
   static const double buttonPaddingHorizontal = 24;
   static const double buttonPaddingVertical = 12;
@@ -35,6 +38,8 @@ class AppSpacing {
   static const double iconMd = 24;
   static const double iconLg = 32;
   static const double iconXl = 48;
+  static const double iconXxl = 64;
+  static const double iconHero = 80; // For hero/logo icons
 
   // Border radius
   static const double radiusNone = 0;
