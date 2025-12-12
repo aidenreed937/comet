@@ -15,7 +15,19 @@ description: Flutter 项目的 Git 和 GitHub 操作，包括分支管理、提�
 |------|------|
 | **禁止直接 push main** | main 只能通过 PR 合并 |
 | **先 rebase 后 PR** | 保持线性历史 |
-| **质量门禁** | 合并前必须通过 analyze + test |
+| **提交前必须通过质量检查** | 参考 `code-quality` skill |
+
+### ⚠️ 提交前必须通过质量检查
+
+**每次提交/推送前必须运行并通过：**
+
+```bash
+flutter analyze --fatal-infos   # 0 errors, 0 warnings, 0 infos
+dart format --set-exit-if-changed .  # 0 changed
+flutter test                    # All tests passed
+```
+
+详细检查清单见 `.claude/skills/code-quality/SKILL.md`
 
 ### 分支命名
 
@@ -84,14 +96,19 @@ git checkout -b feature/xxx
 git fetch origin develop
 git rebase origin/develop
 
-# 3. 质量检查
-flutter analyze && flutter test
+# 3. ⚠️ 质量检查（必须全部通过！）
+flutter analyze --fatal-infos   # 必须 0 issues
+dart format --set-exit-if-changed .  # 必须 0 changed
+flutter test                    # 必须全部通过
 
-# 4. 推送并创建 PR
+# 4. 提交（质量检查通过后）
+git add . && git commit -m "feat: xxx"
+
+# 5. 推送并创建 PR
 git push --force-with-lease origin feature/xxx
 gh pr create --base develop --title "feat: xxx"
 
-# 5. 合并
+# 6. 合并
 gh pr merge <n> --squash --delete-branch
 ```
 
