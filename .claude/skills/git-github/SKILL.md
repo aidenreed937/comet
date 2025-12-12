@@ -14,7 +14,8 @@ description: Flutter 项目的 Git 和 GitHub 操作，包括分支管理、提�
 | 原则 | 说明 |
 |------|------|
 | **禁止直接 push main** | main 只能通过 PR 合并 |
-| **先 rebase 后 PR** | 保持线性历史 |
+| **先 rebase 后 PR** | 提交前必须 rebase 到最新远程分支 |
+| **使用 rebase merge** | PR 合并统一使用 `--rebase` 保持线性历史 |
 | **提交前必须通过质量检查** | 参考 `code-quality` skill |
 
 ### ⚠️ 提交前必须通过质量检查
@@ -62,7 +63,7 @@ git push --force-with-lease          # rebase 后推送
 
 # PR
 gh pr create --base develop          # 创建 PR
-gh pr merge <n> --squash --delete-branch  # 合并
+gh pr merge <n> --rebase --delete-branch  # 合并 PR
 ```
 
 ---
@@ -104,12 +105,16 @@ flutter test                    # 必须全部通过
 # 4. 提交（质量检查通过后）
 git add . && git commit -m "feat: xxx"
 
-# 5. 推送并创建 PR
+# 5. ⚠️ 推送前再次 rebase 远程（确保最新）
+git fetch origin develop
+git rebase origin/develop
 git push --force-with-lease origin feature/xxx
+
+# 6. 创建 PR
 gh pr create --base develop --title "feat: xxx"
 
-# 6. 合并
-gh pr merge <n> --squash --delete-branch
+# 7. 合并（使用 rebase merge）
+gh pr merge <n> --rebase --delete-branch
 ```
 
 ### 发布流程（Develop → Main）
@@ -227,7 +232,7 @@ gh repo create <name> --private --source=. --push
 # PR
 gh pr list
 gh pr view <n>
-gh pr merge <n> --squash --delete-branch
+gh pr merge <n> --rebase --delete-branch  # 统一使用 rebase merge
 ```
 
 ### C. 分支流向图
