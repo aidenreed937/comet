@@ -3,7 +3,6 @@ import 'package:comet/core/utils/result.dart';
 import 'package:comet/features/auth/domain/entities/login_credentials.dart';
 import 'package:comet/features/auth/domain/entities/user.dart';
 import 'package:comet/features/auth/presentation/providers/auth_providers.dart';
-import 'package:comet/features/auth/presentation/providers/login_state.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';

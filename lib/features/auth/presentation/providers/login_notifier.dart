@@ -2,7 +2,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/entities/login_credentials.dart';
 import 'auth_providers.dart';
-import 'login_state.dart';
 
 class LoginNotifier extends Notifier<LoginState> {
   @override
